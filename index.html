@@ -440,23 +440,39 @@
   }
   .again-btn:hover{ background: var(--surface-alt); }
 
-  /* ---- Mobile: simplify board captions, pin the roll button ---- */
+  /* ---- Mobile: simplify board captions, compact fixed control bar ---- */
   @media (max-width: 600px){
     .tag-pill, .tag-text{ display:none; }
 
-    .app{ padding-bottom: 104px; }
+    .app{ padding-bottom: 92px; }
 
-    .roll-btn{
+    .panel-card{
       position: fixed;
       left: 16px;
       right: 16px;
       bottom: 16px;
-      width: auto;
       z-index: 30;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
       box-shadow: 0 10px 24px -8px rgba(27,19,48,0.45);
     }
+    .panel-card h2,
+    .panel-card .stats{
+      display: none;
+    }
+    .dice-row{ padding: 0; }
+    .die{
+      width: 40px;
+      height: 40px;
+      padding: 5px;
+      flex-shrink: 0;
+    }
+    .pip{ width: 6px; height: 6px; }
+    .roll-btn{ flex: 1; }
 
-    #toast-host{ bottom: 84px; }
+    #toast-host{ bottom: 76px; }
   }
 </style>
 
@@ -557,13 +573,13 @@
     {from:93, to:76, text:"Multi-state payroll, one state's rule slipped through", short:"State rule missed"}
   ];
   var LADDERS = [
-    {from:6,  to:22, text:"Keka auto-applies the new labor law update", short:"Labor law auto-applied"},
+    {from:6,  to:31, text:"Keka auto-applies the new labor law update", short:"Labor law auto-applied"},
     {from:17, to:40, text:"PF/ESI/PT checked automatically, every cycle", short:"PF/ESI/PT auto-checked"},
     {from:33, to:55, text:"Arrears and exits handled without manual rework", short:"Arrears handled automatically"},
     {from:46, to:70, text:"Managed services team's got this one covered", short:"Managed services covered"},
     {from:58, to:78, text:"Full & final settlement calculated on time, automatically", short:"F&F calculated on time"},
     {from:72, to:91, text:"Records stay audit-ready, no scramble needed", short:"Audit-ready records"},
-    {from:11, to:26, text:"New joiner onboarded compliantly, zero manual setup", short:"Onboarded, zero setup"},
+    {from:11, to:25, text:"New joiner onboarded compliantly, zero manual setup", short:"Onboarded, zero setup"},
     {from:49, to:67, text:"Statutory filing done digitally, on time, every time", short:"Filing done digitally"},
     {from:84, to:97, text:"Multi-state rules applied correctly, automatically", short:"Multi-state, automated"}
   ];
