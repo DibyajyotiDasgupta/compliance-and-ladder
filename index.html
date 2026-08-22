@@ -403,12 +403,12 @@
   .end-stats{
     display:flex;
     justify-content:center;
-    gap: 28px;
+    gap: 18px;
     margin: 6px 0 20px;
   }
-  .end-stats div{ text-align:center; }
-  .end-stats .n{ font-size: 2rem; font-weight: 800; color: var(--accent-strong); font-variant-numeric: tabular-nums; }
-  .end-stats .l{ font-size: 0.72rem; color: var(--ink-soft); text-transform: uppercase; letter-spacing:0.04em; }
+  .end-stats div{ text-align:center; flex: 1; min-width: 0; }
+  .end-stats .n{ font-size: 1.7rem; font-weight: 800; color: var(--accent-strong); font-variant-numeric: tabular-nums; }
+  .end-stats .l{ font-size: 0.66rem; color: var(--ink-soft); text-transform: uppercase; letter-spacing:0.03em; }
   .end-card p{
     color: var(--ink-soft);
     font-size: 0.95rem;
@@ -549,6 +549,7 @@
     <div class="end-stats">
       <div><div class="n" id="endSnakes">0</div><div class="l">Snakes dodged</div></div>
       <div><div class="n" id="endLadders">0</div><div class="l">Climbs with Keka</div></div>
+      <div><div class="n" id="endTurns">0</div><div class="l">Turns taken</div></div>
     </div>
     <p id="endRecap">Real HR leaders do this every payroll cycle — without the dice.</p>
     <div class="end-actions">
@@ -911,9 +912,11 @@
   var endOverlay = document.getElementById('end-overlay');
   var endSnakes = document.getElementById('endSnakes');
   var endLadders = document.getElementById('endLadders');
+  var endTurns = document.getElementById('endTurns');
   function showEndScreen(){
     endSnakes.textContent = state.snakes;
     endLadders.textContent = state.ladders;
+    endTurns.textContent = state.turns;
     endOverlay.classList.add('show');
   }
 
