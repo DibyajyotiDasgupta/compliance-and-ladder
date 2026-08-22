@@ -1,0 +1,888 @@
+<title>The Compliance Climb</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+  :root{
+    --bg: #FAF9FC;
+    --surface: #FFFFFF;
+    --surface-alt: #F1EEFB;
+    --surface-raised: #FFFFFF;
+    --ink: #1B1330;
+    --ink-soft: #6B6480;
+    --accent: #6C5CE7;
+    --accent-strong: #4E3FD1;
+    --accent-soft: #ECE9FB;
+    --danger: #E8484F;
+    --danger-soft: #FCE7E8;
+    --border: #E4E0F2;
+    --shadow: 0 20px 45px -25px rgba(27,19,48,0.35);
+    --die-face: #FFFFFF;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg: #130D22;
+      --surface: #1D1630;
+      --surface-alt: #251C3D;
+      --surface-raised: #241B3A;
+      --ink: #F3F1FA;
+      --ink-soft: #A79FC2;
+      --accent: #9284F5;
+      --accent-strong: #B3A8FF;
+      --accent-soft: #2C2249;
+      --danger: #FF6B76;
+      --danger-soft: #3A2030;
+      --border: #362A54;
+      --shadow: 0 20px 45px -20px rgba(0,0,0,0.6);
+      --die-face: #2A2043;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg: #130D22;
+    --surface: #1D1630;
+    --surface-alt: #251C3D;
+    --surface-raised: #241B3A;
+    --ink: #F3F1FA;
+    --ink-soft: #A79FC2;
+    --accent: #9284F5;
+    --accent-strong: #B3A8FF;
+    --accent-soft: #2C2249;
+    --danger: #FF6B76;
+    --danger-soft: #3A2030;
+    --border: #362A54;
+    --shadow: 0 20px 45px -20px rgba(0,0,0,0.6);
+    --die-face: #2A2043;
+  }
+
+  *{ box-sizing: border-box; }
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .app{
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 28px 24px 64px;
+  }
+
+  /* ---- Top bar ---- */
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding-bottom: 22px;
+  }
+  .wordmark{
+    font-family:'Manrope', sans-serif;
+    font-weight:800;
+    font-size: 1.35rem;
+    color: var(--accent-strong);
+    letter-spacing: -0.02em;
+  }
+  .eyebrow{
+    font-size: 0.75rem;
+    font-weight:700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  .hero{
+    padding: 6px 0 30px;
+    max-width: 640px;
+  }
+  .hero h1{
+    font-family:'Fraunces', Georgia, serif;
+    font-optical-sizing: auto;
+    font-weight: 600;
+    font-size: clamp(2rem, 4vw, 2.85rem);
+    line-height: 1.05;
+    margin: 0 0 10px;
+    text-wrap: balance;
+  }
+  .hero p{
+    margin:0;
+    color: var(--ink-soft);
+    font-size: 1.05rem;
+    line-height:1.5;
+    text-wrap: balance;
+  }
+
+  /* ---- Layout ---- */
+  .layout{
+    display:grid;
+    grid-template-columns: minmax(0,1fr) 300px;
+    gap: 28px;
+    align-items:start;
+  }
+  @media (max-width: 880px){
+    .layout{ grid-template-columns: 1fr; }
+  }
+
+  .board-card{
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 18px;
+    box-shadow: var(--shadow);
+    position: relative;
+  }
+  .board-wrap{
+    width:100%;
+    aspect-ratio: 1/1;
+    position: relative;
+  }
+  svg#board{
+    width:100%;
+    height:100%;
+    display:block;
+    overflow: visible;
+  }
+  .cell-fill-a{ fill: var(--surface); }
+  .cell-fill-b{ fill: var(--surface-alt); }
+  .cell-border{ stroke: var(--border); stroke-width: 1; }
+  .cell-num{
+    font-family:'Manrope', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    fill: var(--ink-soft);
+    opacity: 0.65;
+  }
+  .cell-num.milestone{ fill: var(--accent-strong); opacity:0.9; }
+
+  .snake-body{ fill:none; stroke-width: 6; stroke-linecap: round; }
+  .snake-belly{ fill:none; stroke-width: 2.2; stroke-linecap: round; opacity: 0.9; }
+  .snake-head{ stroke: var(--surface); stroke-width: 1.5; }
+  .snake-eye{ fill: var(--surface); }
+  .snake-eye-pupil{ fill: var(--ink); }
+  .snake-tongue{ stroke: #C0392B; stroke-width: 1.1; stroke-linecap: round; fill:none; }
+  .snake-group, .ladder-group{ cursor: help; }
+
+  .ladder-rail{
+    fill:none;
+    stroke: var(--accent);
+    stroke-width: 4.5;
+    stroke-linecap: round;
+  }
+  .ladder-rung{
+    stroke: var(--accent);
+    stroke-width: 3;
+    stroke-linecap: round;
+    opacity:0.85;
+  }
+  .ladder-badge-bg{ fill: var(--surface); stroke: var(--accent); stroke-width: 2; }
+  .ladder-badge-check{ stroke: var(--accent); stroke-width: 2.2; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+
+  .trophy-part{ fill: #F0A93B; }
+  .trophy-outline{ stroke: #C97F1D; stroke-width: 1.4; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+
+  .tag-pill{ fill: var(--surface); stroke-width: 1.2; }
+  .tag-text{ font-family:'Manrope', sans-serif; font-size: 7.5px; font-weight: 800; }
+
+  #token{
+    transition: transform 0.16s ease;
+  }
+  #token.sliding{ transition: transform 0.62s cubic-bezier(.45,0,.55,1); }
+  @media (prefers-reduced-motion: reduce){
+    #token, #token.sliding{ transition: none; }
+  }
+  .token-body{ fill: var(--accent); stroke: var(--surface); stroke-width: 2.5; }
+  .token-face{ fill: var(--surface); }
+  .token-handle{ stroke: var(--ink); stroke-width: 2; fill:none; stroke-linecap: round; }
+
+  /* ---- Side panel ---- */
+  .panel{
+    display:flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .panel-card{
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 20px;
+    box-shadow: var(--shadow);
+  }
+  .panel-card h2{
+    margin: 0 0 14px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--ink-soft);
+  }
+
+  .dice-row{
+    display:flex;
+    align-items:center;
+    gap: 16px;
+    justify-content: center;
+    padding: 6px 0 18px;
+  }
+  .die{
+    width: 60px;
+    height: 60px;
+    border-radius: 14px;
+    background: var(--die-face);
+    border: 1px solid var(--border);
+    display:grid;
+    grid-template-columns: repeat(3,1fr);
+    grid-template-rows: repeat(3,1fr);
+    padding: 9px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 6px 14px -8px rgba(27,19,48,0.4);
+  }
+  .die.rolling{ animation: dieShake 0.09s linear infinite; }
+  @keyframes dieShake{
+    0%{ transform: rotate(0deg); }
+    50%{ transform: rotate(-6deg) scale(1.03); }
+    100%{ transform: rotate(5deg) scale(0.98); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .die.rolling{ animation: none; }
+  }
+  .pip{
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0;
+    justify-self: center;
+    align-self: center;
+  }
+  .pip.on{ opacity: 1; }
+
+  .roll-btn{
+    width:100%;
+    padding: 13px 16px;
+    border-radius: 12px;
+    border: none;
+    background: var(--accent);
+    color: white;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
+  }
+  .roll-btn:hover:not(:disabled){ background: var(--accent-strong); }
+  .roll-btn:active:not(:disabled){ transform: scale(0.98); }
+  .roll-btn:disabled{ opacity: 0.55; cursor: not-allowed; }
+
+  .stats{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 16px;
+  }
+  .stat{
+    background: var(--surface-alt);
+    border-radius: 12px;
+    padding: 10px 12px;
+  }
+  .stat .n{
+    font-size: 1.35rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+  }
+  .stat .l{
+    font-size: 0.68rem;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight:700;
+    margin-top: 2px;
+  }
+
+  .board-legend{
+    display:flex;
+    justify-content:center;
+    flex-wrap: wrap;
+    gap: 10px 28px;
+    padding-top: 16px;
+    margin-top: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+  }
+  .board-legend .item{ display:flex; align-items:center; gap: 8px; }
+  .board-legend svg{ flex-shrink:0; }
+
+  .reset-link{
+    background:none;
+    border:none;
+    color: var(--ink-soft);
+    font-family: inherit;
+    font-size: 0.82rem;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+    padding: 0;
+  }
+  .reset-link:hover{ color: var(--ink); }
+
+  /* ---- Toast ---- */
+  #toast-host{
+    position: fixed;
+    bottom: 26px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 40;
+    display:flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items:center;
+    pointer-events:none;
+    width: min(92vw, 460px);
+  }
+  .toast{
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--toast-accent, var(--accent));
+    border-radius: 12px;
+    padding: 12px 16px;
+    box-shadow: var(--shadow);
+    font-size: 0.88rem;
+    line-height: 1.35;
+    animation: toastIn 0.22s ease, toastOut 0.3s ease 2.3s forwards;
+    max-width: 100%;
+  }
+  .toast b{ display:block; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 3px; color: var(--toast-accent, var(--accent)); }
+  @keyframes toastIn{ from{ opacity:0; transform: translateY(8px);} to{ opacity:1; transform: translateY(0);} }
+  @keyframes toastOut{ from{ opacity:1;} to{ opacity:0; transform: translateY(-6px);} }
+
+  /* ---- End overlay ---- */
+  #end-overlay{
+    position: fixed;
+    inset: 0;
+    background: rgba(19,13,34,0.55);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index: 50;
+    padding: 20px;
+  }
+  #end-overlay.show{ display:flex; }
+  .end-card{
+    background: var(--surface);
+    border-radius: 22px;
+    padding: 38px 34px;
+    max-width: 460px;
+    width:100%;
+    text-align:center;
+    box-shadow: 0 30px 70px -20px rgba(0,0,0,0.5);
+    border: 1px solid var(--border);
+  }
+  .end-card .kicker{
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .end-card h2{
+    font-family:'Fraunces', Georgia, serif;
+    font-weight: 600;
+    font-size: 1.8rem;
+    margin: 0 0 16px;
+    text-wrap: balance;
+  }
+  .end-stats{
+    display:flex;
+    justify-content:center;
+    gap: 28px;
+    margin: 6px 0 20px;
+  }
+  .end-stats div{ text-align:center; }
+  .end-stats .n{ font-size: 2rem; font-weight: 800; color: var(--accent-strong); font-variant-numeric: tabular-nums; }
+  .end-stats .l{ font-size: 0.72rem; color: var(--ink-soft); text-transform: uppercase; letter-spacing:0.04em; }
+  .end-card p{
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin: 0 0 26px;
+  }
+  .end-actions{ display:flex; flex-direction:column; gap: 10px; }
+  .cta{
+    display:inline-block;
+    background: var(--accent);
+    color: white;
+    text-decoration: none;
+    font-weight: 700;
+    padding: 13px 18px;
+    border-radius: 12px;
+    font-size: 0.92rem;
+  }
+  .cta:hover{ background: var(--accent-strong); }
+  .again-btn{
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--ink);
+    padding: 11px 18px;
+    border-radius: 12px;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+  .again-btn:hover{ background: var(--surface-alt); }
+</style>
+
+<div class="app">
+  <div class="topbar">
+    <div class="wordmark">keka</div>
+    <div class="eyebrow">Compliance, gamified</div>
+  </div>
+
+  <div class="hero">
+    <h1>The Compliance Climb</h1>
+    <p>Roll the dice. Dodge the chaos of manual payroll compliance. Climb toward square 100 — where every rule is already handled.</p>
+  </div>
+
+  <div class="layout">
+    <div class="board-card">
+      <div class="board-wrap">
+        <svg id="board" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg">
+          <g id="cells"></g>
+          <g id="snakes"></g>
+          <g id="ladders"></g>
+          <g id="numbers"></g>
+          <g id="trophy"></g>
+          <g id="token">
+            <path class="token-handle" d="M -6 -17 Q 0 -23 6 -17"></path>
+            <circle class="token-body" r="13"></circle>
+            <rect x="-8" y="1" width="16" height="2.4" fill="var(--surface)" opacity="0.55"></rect>
+            <circle class="token-face" cx="-4.5" cy="-2" r="1.8"></circle>
+            <circle class="token-face" cx="4.5" cy="-2" r="1.8"></circle>
+            <path class="token-handle" d="M -4.5 3.5 Q 0 6.5 4.5 3.5" stroke="var(--surface)"></path>
+          </g>
+        </svg>
+      </div>
+      <div class="board-legend">
+        <div class="item">
+          <svg width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.5" fill="#E8484F" stroke="var(--surface)" stroke-width="1.5"></circle><circle cx="7" cy="8.5" r="1.6" fill="var(--surface)"></circle><circle cx="13" cy="8.5" r="1.6" fill="var(--surface)"></circle><circle cx="7" cy="8.5" r="0.7" fill="var(--ink)"></circle><circle cx="13" cy="8.5" r="0.7" fill="var(--ink)"></circle></svg>
+          Manual compliance mishap &mdash; hover for the full story
+        </div>
+        <div class="item">
+          <svg width="20" height="20" viewBox="0 0 20 20"><line x1="5" y1="2" x2="5" y2="18" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"></line><line x1="15" y1="2" x2="15" y2="18" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"></line><line x1="5" y1="6" x2="15" y2="6" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"></line><line x1="5" y1="10" x2="15" y2="10" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"></line><line x1="5" y1="14" x2="15" y2="14" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"></line></svg>
+          Keka automates it &mdash; hover for the full story
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-card">
+        <h2>Your turn</h2>
+        <div class="dice-row">
+          <div class="die" id="die"></div>
+        </div>
+        <button class="roll-btn" id="rollBtn">Roll the dice</button>
+        <div class="stats">
+          <div class="stat"><div class="n" id="statSquare">1</div><div class="l">Square</div></div>
+          <div class="stat"><div class="n" id="statTurns">0</div><div class="l">Turns</div></div>
+          <div class="stat"><div class="n" id="statSnakes">0</div><div class="l">Snakes hit</div></div>
+          <div class="stat"><div class="n" id="statLadders">0</div><div class="l">Ladders climbed</div></div>
+        </div>
+      </div>
+
+      <button class="reset-link" id="resetBtn">Restart climb</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-host"></div>
+
+<div id="end-overlay">
+  <div class="end-card">
+    <div class="kicker">Square 100 &middot; fully compliant</div>
+    <h2>You made it to full compliance.</h2>
+    <div class="end-stats">
+      <div><div class="n" id="endSnakes">0</div><div class="l">Snakes dodged</div></div>
+      <div><div class="n" id="endLadders">0</div><div class="l">Climbs with Keka</div></div>
+    </div>
+    <p id="endRecap">Real HR leaders do this every payroll cycle — without the dice.</p>
+    <div class="end-actions">
+      <a class="cta" href="https://www.keka.com/payroll-compliance" target="_blank" rel="noopener">See how Keka handles compliance</a>
+      <button class="again-btn" id="playAgainBtn">Play again</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var SNAKES = [
+    {from:14, to:4,  text:"PF rates changed, spreadsheet didn't get the memo", short:"PF rates changed"},
+    {from:27, to:9,  text:"PT slab shifted by state, nobody noticed", short:"PT slab shifted"},
+    {from:38, to:20, text:"Employee exit not reconciled, arrears go sideways", short:"Exit not reconciled"},
+    {from:52, to:35, text:"TDS deadline missed mid-quarter chaos", short:"TDS deadline missed"},
+    {from:65, to:48, text:"ESI rules quietly changed for one branch", short:"ESI rules changed"},
+    {from:81, to:60, text:"Audit flags inconsistent records", short:"Audit flags issues"},
+    {from:19, to:7,  text:"New joiner's compliance setup done manually, done wrong", short:"Onboarding done wrong"},
+    {from:44, to:30, text:"Full & final settlement delayed, employee escalates", short:"F&F settlement delayed"},
+    {from:71, to:55, text:"Statutory filing done on paper, lost in the shuffle", short:"Filing lost in shuffle"},
+    {from:93, to:76, text:"Multi-state payroll, one state's rule slipped through", short:"State rule missed"}
+  ];
+  var LADDERS = [
+    {from:6,  to:22, text:"Keka auto-applies the new labor law update", short:"Labor law auto-applied"},
+    {from:17, to:40, text:"PF/ESI/PT checked automatically, every cycle", short:"PF/ESI/PT auto-checked"},
+    {from:33, to:55, text:"Arrears and exits handled without manual rework", short:"Arrears handled automatically"},
+    {from:46, to:70, text:"Managed services team's got this one covered", short:"Managed services covered"},
+    {from:58, to:78, text:"Full & final settlement calculated on time, automatically", short:"F&F calculated on time"},
+    {from:72, to:91, text:"Records stay audit-ready, no scramble needed", short:"Audit-ready records"},
+    {from:11, to:26, text:"New joiner onboarded compliantly, zero manual setup", short:"Onboarded, zero setup"},
+    {from:49, to:67, text:"Statutory filing done digitally, on time, every time", short:"Filing done digitally"},
+    {from:84, to:97, text:"Multi-state rules applied correctly, automatically", short:"Multi-state, automated"}
+  ];
+
+  var snakeMap = {}, ladderMap = {};
+  SNAKES.forEach(function(s){ snakeMap[s.from] = s; });
+  LADDERS.forEach(function(l){ ladderMap[l.from] = l; });
+
+  var CELL = 60;
+  function squareToCoord(n){
+    var idx = n - 1;
+    var row = Math.floor(idx / 10);
+    var col = idx % 10;
+    if (row % 2 === 1) col = 9 - col;
+    var x = col * CELL + CELL / 2;
+    var y = (9 - row) * CELL + CELL / 2;
+    return {x: x, y: y};
+  }
+
+  var svgNS = "http://www.w3.org/2000/svg";
+  function el(tag, attrs){
+    var e = document.createElementNS(svgNS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+
+  // --- draw cells ---
+  var cellsG = document.getElementById('cells');
+  var numbersG = document.getElementById('numbers');
+  for (var n = 1; n <= 100; n++){
+    var idx = n - 1, row = Math.floor(idx/10), col = idx % 10;
+    if (row % 2 === 1) col = 9 - col;
+    var x0 = col * CELL, y0 = (9 - row) * CELL;
+    var parity = (row + col) % 2 === 0 ? 'cell-fill-a' : 'cell-fill-b';
+    var rect = el('rect', {x:x0, y:y0, width:CELL, height:CELL, class: parity + ' cell-border'});
+    cellsG.appendChild(rect);
+    var isMilestone = (n === 1 || n === 100 || snakeMap[n] || ladderMap[n]);
+    var label = el('text', {x:x0+7, y:y0+15, class: 'cell-num' + (isMilestone ? ' milestone' : '')});
+    label.textContent = n;
+    numbersG.appendChild(label);
+  }
+
+  // --- trophy at square 100 ---
+  (function drawTrophy(){
+    var trophyG = document.getElementById('trophy');
+    var c = squareToCoord(100);
+    var cx = c.x + 6, cy = c.y + 10;
+    var bowl = el('path', {class:'trophy-part', d:
+      'M '+(cx-8)+' '+(cy-11)+' L '+(cx-8)+' '+(cy-3)+' '+
+      'Q '+(cx-8)+' '+(cy+4)+' '+cx+' '+(cy+4)+' '+
+      'Q '+(cx+8)+' '+(cy+4)+' '+(cx+8)+' '+(cy-3)+' '+
+      'L '+(cx+8)+' '+(cy-11)+' Z'});
+    trophyG.appendChild(bowl);
+    trophyG.appendChild(el('path', {class:'trophy-outline', d:'M '+(cx-9)+' '+(cy-6)+' a4,4 0 0 1 0,8'}));
+    trophyG.appendChild(el('path', {class:'trophy-outline', d:'M '+(cx+9)+' '+(cy-6)+' a4,4 0 0 0 0,8'}));
+    trophyG.appendChild(el('rect', {class:'trophy-part', x:cx-1.6, y:cy+4, width:3.2, height:5}));
+    trophyG.appendChild(el('rect', {class:'trophy-part', x:cx-7, y:cy+9, width:14, height:3, rx:1.2}));
+  })();
+
+  // --- draw ladders ---
+  var laddersG = document.getElementById('ladders');
+  function perp(dx, dy){
+    var len = Math.hypot(dx, dy) || 1;
+    return {x: -dy/len, y: dx/len};
+  }
+  function lerp(p1, p2, t){ return {x: p1.x + (p2.x-p1.x)*t, y: p1.y + (p2.y-p1.y)*t}; }
+
+  function pillWidth(text){ return Math.max(34, text.length * 3.6 + 10); }
+  function safeOffset(anchor, dirX, dirY, dist, halfW){
+    var px = anchor.x + dirX*dist, py = anchor.y + dirY*dist;
+    if (px - halfW < 8 || px + halfW > 592 || py < 14 || py > 586){
+      px = anchor.x - dirX*dist; py = anchor.y - dirY*dist;
+    }
+    px = Math.max(halfW + 6, Math.min(600 - halfW - 6, px));
+    py = Math.max(12, Math.min(588, py));
+    return {x:px, y:py};
+  }
+  function drawTag(parent, text, anchor, dirX, dirY, dist, colorForText){
+    var w = pillWidth(text);
+    var pos = safeOffset(anchor, dirX, dirY, dist, w/2);
+    parent.appendChild(el('rect', {class:'tag-pill', x:pos.x-w/2, y:pos.y-6, width:w, height:12, rx:6, stroke:colorForText}));
+    var t = el('text', {class:'tag-text', x:pos.x, y:pos.y+2.6, 'text-anchor':'middle', fill:colorForText});
+    t.textContent = text;
+    parent.appendChild(t);
+  }
+
+  LADDERS.forEach(function(l){
+    var p1 = squareToCoord(l.from), p2 = squareToCoord(l.to);
+    var dx = p2.x-p1.x, dy = p2.y-p1.y;
+    var n = perp(dx,dy);
+    var off = 9;
+    var g = el('g', {class:'ladder-group'});
+    var title = el('title', {});
+    title.textContent = 'Ladder ' + l.from + ' → ' + l.to + ': ' + l.text;
+    g.appendChild(title);
+    var railA1 = {x:p1.x+n.x*off, y:p1.y+n.y*off}, railA2 = {x:p2.x+n.x*off, y:p2.y+n.y*off};
+    var railB1 = {x:p1.x-n.x*off, y:p1.y-n.y*off}, railB2 = {x:p2.x-n.x*off, y:p2.y-n.y*off};
+    g.appendChild(el('path', {class:'ladder-rail', d:'M '+railA1.x+' '+railA1.y+' L '+railA2.x+' '+railA2.y}));
+    g.appendChild(el('path', {class:'ladder-rail', d:'M '+railB1.x+' '+railB1.y+' L '+railB2.x+' '+railB2.y}));
+    var rungs = 6;
+    for (var i=1;i<rungs;i++){
+      var t = i/rungs;
+      var c = lerp(p1,p2,t);
+      var rA = {x:c.x+n.x*off, y:c.y+n.y*off}, rB = {x:c.x-n.x*off, y:c.y-n.y*off};
+      g.appendChild(el('line', {class:'ladder-rung', x1:rA.x, y1:rA.y, x2:rB.x, y2:rB.y}));
+    }
+    // checkmark badge at top (p2)
+    g.appendChild(el('circle', {class:'ladder-badge-bg', cx:p2.x, cy:p2.y, r:11}));
+    g.appendChild(el('path', {class:'ladder-badge-check', d:'M '+(p2.x-4.5)+' '+p2.y+' L '+(p2.x-1)+' '+(p2.y+3.5)+' L '+(p2.x+5)+' '+(p2.y-4)}));
+    drawTag(g, l.short, p2, n.x, n.y, 20, 'var(--accent-strong)');
+    laddersG.appendChild(g);
+  });
+
+  // --- draw snakes ---
+  var snakesG = document.getElementById('snakes');
+  function catmullRomPath(pts){
+    if (pts.length < 2) return '';
+    var d = 'M '+pts[0].x+' '+pts[0].y+' ';
+    for (var i=0;i<pts.length-1;i++){
+      var p0 = pts[i-1] || pts[i];
+      var p1 = pts[i];
+      var p2 = pts[i+1];
+      var p3 = pts[i+2] || p2;
+      var c1x = p1.x + (p2.x-p0.x)/6, c1y = p1.y + (p2.y-p0.y)/6;
+      var c2x = p2.x - (p3.x-p1.x)/6, c2y = p2.y - (p3.y-p1.y)/6;
+      d += 'C '+c1x+' '+c1y+', '+c2x+' '+c2y+', '+p2.x+' '+p2.y+' ';
+    }
+    return d;
+  }
+
+  var SNAKE_COLORS = ['#E8484F', '#F2994A', '#B33951', '#E0607A', '#D9622B'];
+  function lighten(hex, amt){
+    var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    r = Math.round(r + (255-r)*amt); g = Math.round(g + (255-g)*amt); b = Math.round(b + (255-b)*amt);
+    return 'rgb('+r+','+g+','+b+')';
+  }
+
+  SNAKES.forEach(function(s, idx){
+    var color = SNAKE_COLORS[idx % SNAKE_COLORS.length];
+    var belly = lighten(color, 0.55);
+    var p1 = squareToCoord(s.from), p2 = squareToCoord(s.to); // head -> tail
+    var dx = p2.x-p1.x, dy = p2.y-p1.y;
+    var len = Math.hypot(dx,dy);
+    var n = perp(dx,dy);
+    var amp = Math.min(16, len*0.11);
+    var segments = 8;
+    var pts = [];
+    for (var i=0;i<=segments;i++){
+      var t = i/segments;
+      var base = lerp(p1,p2,t);
+      var wave = (i===0||i===segments) ? 0 : Math.sin(t*Math.PI*3)*amp;
+      pts.push({x: base.x+n.x*wave, y: base.y+n.y*wave});
+    }
+    var pathD = catmullRomPath(pts);
+
+    var g = el('g', {class:'snake-group'});
+    var title = el('title', {});
+    title.textContent = 'Snake ' + s.from + ' → ' + s.to + ': ' + s.text;
+    g.appendChild(title);
+
+    g.appendChild(el('path', {class:'snake-body', d:pathD, stroke:color}));
+    g.appendChild(el('path', {class:'snake-belly', d:pathD, stroke:belly}));
+
+    // head: faces away from the tail, along the continuation of the body direction
+    var dirHead = {x:-dx/len, y:-dy/len};
+    var headR = 7;
+    g.appendChild(el('circle', {cx:p1.x, cy:p1.y, r:headR, fill:color, class:'snake-head'}));
+
+    var forkPerp = perp(dirHead.x, dirHead.y);
+    var eyeFwd = 2, eyeSide = 2.8;
+    var eye1 = {x:p1.x+forkPerp.x*eyeSide+dirHead.x*eyeFwd, y:p1.y+forkPerp.y*eyeSide+dirHead.y*eyeFwd};
+    var eye2 = {x:p1.x-forkPerp.x*eyeSide+dirHead.x*eyeFwd, y:p1.y-forkPerp.y*eyeSide+dirHead.y*eyeFwd};
+    g.appendChild(el('circle', {class:'snake-eye', cx:eye1.x, cy:eye1.y, r:1.8}));
+    g.appendChild(el('circle', {class:'snake-eye', cx:eye2.x, cy:eye2.y, r:1.8}));
+    g.appendChild(el('circle', {class:'snake-eye-pupil', cx:eye1.x, cy:eye1.y, r:0.9}));
+    g.appendChild(el('circle', {class:'snake-eye-pupil', cx:eye2.x, cy:eye2.y, r:0.9}));
+
+    // forked tongue poking out past the head
+    var tongueBase = {x:p1.x+dirHead.x*headR, y:p1.y+dirHead.y*headR};
+    var tongueTip = {x:p1.x+dirHead.x*(headR+4), y:p1.y+dirHead.y*(headR+4)};
+    var fork1 = {x:tongueTip.x+forkPerp.x*1.8, y:tongueTip.y+forkPerp.y*1.8};
+    var fork2 = {x:tongueTip.x-forkPerp.x*1.8, y:tongueTip.y-forkPerp.y*1.8};
+    g.appendChild(el('path', {class:'snake-tongue', d:
+      'M '+tongueBase.x+' '+tongueBase.y+' L '+tongueTip.x+' '+tongueTip.y+' '+
+      'M '+tongueTip.x+' '+tongueTip.y+' L '+fork1.x+' '+fork1.y+' '+
+      'M '+tongueTip.x+' '+tongueTip.y+' L '+fork2.x+' '+fork2.y}));
+
+    drawTag(g, s.short, p1, n.x, n.y, 16, color);
+
+    snakesG.appendChild(g);
+  });
+
+  // --- token ---
+  var token = document.getElementById('token');
+  function setTokenPos(square, animated){
+    var p = squareToCoord(square);
+    token.style.transform = 'translate('+p.x+'px,'+p.y+'px)';
+  }
+  setTokenPos(1);
+
+  // --- dice ---
+  var PIP_LAYOUTS = {
+    1: [5],
+    2: [1,9],
+    3: [1,5,9],
+    4: [1,3,7,9],
+    5: [1,3,5,7,9],
+    6: [1,3,4,6,7,9]
+  };
+  var dieEl = document.getElementById('die');
+  var pipEls = [];
+  for (var i=1;i<=9;i++){
+    var p = document.createElement('div');
+    p.className = 'pip';
+    dieEl.appendChild(p);
+    pipEls.push(p);
+  }
+  function showDie(value){
+    var active = PIP_LAYOUTS[value] || [];
+    pipEls.forEach(function(p, i){
+      p.classList.toggle('on', active.indexOf(i+1) !== -1);
+    });
+  }
+  showDie(1);
+
+  // --- toast ---
+  var toastHost = document.getElementById('toast-host');
+  function showToast(kicker, text, accentVar){
+    var t = document.createElement('div');
+    t.className = 'toast';
+    t.style.setProperty('--toast-accent', accentVar);
+    var b = document.createElement('b');
+    b.textContent = kicker;
+    t.appendChild(b);
+    var span = document.createElement('span');
+    span.textContent = text;
+    t.appendChild(span);
+    toastHost.appendChild(t);
+    setTimeout(function(){ t.remove(); }, 2650);
+  }
+
+  // --- state ---
+  var state = { square: 1, turns: 0, snakes: 0, ladders: 0, over: false };
+  var statSquare = document.getElementById('statSquare');
+  var statTurns = document.getElementById('statTurns');
+  var statSnakes = document.getElementById('statSnakes');
+  var statLadders = document.getElementById('statLadders');
+
+  function updateStats(){
+    statSquare.textContent = state.square;
+    statTurns.textContent = state.turns;
+    statSnakes.textContent = state.snakes;
+    statLadders.textContent = state.ladders;
+  }
+
+  function delay(ms){ return new Promise(function(res){ setTimeout(res, ms); }); }
+
+  var rollBtn = document.getElementById('rollBtn');
+
+  async function stepMove(target){
+    while (state.square < target){
+      state.square++;
+      setTokenPos(state.square);
+      updateStats();
+      await delay(150);
+    }
+  }
+
+  async function slideTo(target, kind){
+    token.classList.add('sliding');
+    setTokenPos(target);
+    await delay(650);
+    token.classList.remove('sliding');
+    state.square = target;
+    updateStats();
+  }
+
+  async function playTurn(){
+    if (state.over) return;
+    rollBtn.disabled = true;
+    state.turns++;
+
+    dieEl.classList.add('rolling');
+    var rollFrames = 8;
+    for (var i=0;i<rollFrames;i++){
+      showDie(1 + Math.floor(Math.random()*6));
+      await delay(60);
+    }
+    dieEl.classList.remove('rolling');
+
+    var roll = 1 + Math.floor(Math.random()*6);
+    showDie(roll);
+    await delay(150);
+
+    var target = Math.min(100, state.square + roll);
+    await stepMove(target);
+
+    await delay(200);
+
+    if (snakeMap[state.square]){
+      var s = snakeMap[state.square];
+      await delay(350);
+      await slideTo(s.to, 'snake');
+      state.snakes++;
+      updateStats();
+      showToast('Compliance mishap', s.text, 'var(--danger)');
+      await delay(500);
+    } else if (ladderMap[state.square]){
+      var l = ladderMap[state.square];
+      await delay(350);
+      await slideTo(l.to, 'ladder');
+      state.ladders++;
+      updateStats();
+      showToast('Keka handles it', l.text, 'var(--accent)');
+      await delay(500);
+    }
+
+    if (state.square >= 100){
+      state.over = true;
+      showEndScreen();
+      return;
+    }
+
+    rollBtn.disabled = false;
+  }
+
+  rollBtn.addEventListener('click', playTurn);
+
+  var endOverlay = document.getElementById('end-overlay');
+  var endSnakes = document.getElementById('endSnakes');
+  var endLadders = document.getElementById('endLadders');
+  function showEndScreen(){
+    endSnakes.textContent = state.snakes;
+    endLadders.textContent = state.ladders;
+    endOverlay.classList.add('show');
+  }
+
+  function resetGame(){
+    state.square = 1; state.turns = 0; state.snakes = 0; state.ladders = 0; state.over = false;
+    setTokenPos(1);
+    updateStats();
+    showDie(1);
+    rollBtn.disabled = false;
+    endOverlay.classList.remove('show');
+  }
+
+  document.getElementById('resetBtn').addEventListener('click', resetGame);
+  document.getElementById('playAgainBtn').addEventListener('click', resetGame);
+
+  updateStats();
+})();
+</script>
