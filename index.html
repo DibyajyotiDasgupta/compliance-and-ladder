@@ -875,7 +875,15 @@
     showDie(roll);
     await delay(150);
 
-    var target = Math.min(100, state.square + roll);
+    var target = state.square + roll;
+    if (target > 100){
+      updateStats();
+      await delay(200);
+      showToast('So close!', "You need an exact roll to land on 100 — try again next turn.", 'var(--accent)');
+      await delay(300);
+      rollBtn.disabled = false;
+      return;
+    }
     await stepMove(target);
 
     await delay(200);
