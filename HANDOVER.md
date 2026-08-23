@@ -2,51 +2,47 @@
 
 **Purpose:** a Snakes & Ladders browser game, single HTML file, no backend. Built for Keka
 (payroll/compliance HR software) as a playful marketing prototype: snakes = manual compliance
-mishaps, ladders = Keka automating something. Player rolls dice, climbs to square 100.
+mishaps, ladders = Keka automating something.
+
+**Current mode: vs-Competitor race.** This is NOT the original solo-climb game anymore — it was
+fully replaced. You (a dog token) race a computer-controlled competitor (a cat token) to square
+100. Same rules apply to both sides. First to land exactly on 100 wins; the other side gets a
+loss screen. See "What's actually live right now" below for full mechanics.
 
 ## Read this first: the one thing that WILL be wrong in a fresh session
 
-During development, edits were made to a working copy inside Claude's **scratchpad temp
-directory**, which is unique to each conversation and does **not carry over** to a new session.
-That path no longer exists once this conversation ends. **Do not try to reuse it.**
+Working copies were edited inside Claude's **scratchpad temp directory**, unique to each
+conversation, gone once that conversation ends. **Any path under
+`...\AppData\Local\Temp\claude\...\scratchpad\...` from a previous session no longer exists.**
 
-**The actual source of truth that survives is the deploy repo below.** In a fresh session:
-1. Read `index.html` from the deploy repo path (or `git show HEAD:index.html`) to get the current
-   live game.
-2. If you need to publish it as a Claude Artifact again, copy that file into whatever fresh
-   scratchpad path the new session provides, then use the Artifact tool on that copy.
-3. Never assume any path from a previous session's scratchpad still exists.
+**The deploy repo is the only thing that survives.** In a fresh session:
+1. Read `index.html` from the deploy repo path (or `git show HEAD:index.html`) — that's the real
+   current live game, full stop.
+2. To preview a change as a Claude Artifact, copy the file into whatever fresh scratchpad path
+   *this* session provides, then Artifact-publish that copy.
+3. Never assume a scratchpad path, or a standalone mockup file mentioned below, still exists —
+   rebuild it from scratch if needed.
 
-## The three "copies" of this game and how they relate
+## Paths and URLs
 
-| Copy | Path | Purpose | Persists across sessions? |
-|---|---|---|---|
-| **Deploy repo** (source of truth) | `D:\Work Folder\ContentLabHQ\Automation Project\compliance-climb-deploy\index.html` | Git-tracked, pushed to GitHub Pages | Yes — real disk path, git history |
-| **Production (live)** | https://dibyajyotidasgupta.github.io/compliance-and-ladder/ | What the public sees | Yes — hosted on GitHub |
-| **Claude Artifact (mockup/preview)** | https://claude.ai/code/artifact/96619a4a-26bf-4f71-bc64-c28c52be025f | Used to preview changes before pushing to production | Yes, the URL persists (tied to the account, not the session) — but re-publishing it requires a *local file* to point the Artifact tool at, and that file lived in the old scratchpad path |
+| Copy | Path/URL | Notes |
+|---|---|---|
+| **Deploy repo** (source of truth) | `D:\Work Folder\ContentLabHQ\Automation Project\compliance-climb-deploy\index.html` | Git-tracked, pushed to GitHub Pages. Check this path still resolves — the whole project folder has moved drives once already this project (`C:\...` → `D:\...`). |
+| **Production (live)** | https://dibyajyotidasgupta.github.io/compliance-and-ladder/ | What the public sees. Currently serving the vs-competitor game. |
+| **Main Claude Artifact** | https://claude.ai/code/artifact/96619a4a-26bf-4f71-bc64-c28c52be025f | Mirrors production. Republish to this same URL when previewing changes (pass `url` explicitly if publishing from a different session/conversation than the one that made it). |
+| **Mobile-fix mockup Artifact** (still open decision, see below) | https://claude.ai/code/artifact/348decd0-990c-4bc2-9b64-d0de020c670a | "Mobile Layout Options" — standalone comparison of 3 candidate fixes for a live mobile bug. NOT part of production. The source file (`mobile-fix-options.html`) lived only in scratchpad and will need to be rebuilt from this doc's description if a fresh session needs to touch it further. |
 
-**Important path note:** this whole project folder moved once already this session, from
-`C:\Work Folder\...` to `D:\Work Folder\...` (same relative path, different drive). If paths
-below don't resolve, run `pwd` / check `D:\Work Folder\ContentLabHQ\Automation Project\` first —
-it may have moved again.
+## Standard workflow for making a change (battle-tested, repeat this)
 
-## Standard workflow for making a change (established and battle-tested this session)
-
-1. Edit `index.html` directly in the deploy repo
-   (`D:\Work Folder\ContentLabHQ\Automation Project\compliance-climb-deploy\index.html`).
-2. If you want to preview it as a Claude Artifact before shipping: copy that file into a
-   scratchpad path, then use the Artifact tool (title "The Compliance Climb", favicon 🎲,
-   description: "A branded Snakes & Ladders game where manual payroll chaos gets automated
-   away by Keka."). **Always republish to the same artifact URL above** (pass no `url` param if
-   publishing from the same conversation that owns it; if a different session, pass the `url`
-   explicitly to update in place rather than creating a duplicate).
+1. Edit `index.html` directly in the deploy repo.
+2. To preview as a Claude Artifact before shipping: copy the file into a scratchpad path, then
+   use the Artifact tool (title "The Compliance Climb", favicon 🎲). Republish to the URL above.
 3. Test locally before committing:
-   - Copy `index.html` to a sibling file (e.g. `compliance-climb.html`) one level up, since
-     GitHub Pages/production serves it as `index.html` but local testing is easier from a
-     differently-named file to avoid confusion.
-   - Create `.claude/launch.json` **inside the `compliance-climb-deploy` folder itself**
-     (quirk: the preview tool resolves relative to wherever the Bash tool's cwd happens to be,
-     which has consistently been this folder) with:
+   - Copy `index.html` to a sibling file one level up (e.g. `compliance-climb.html`) so local
+     testing doesn't collide with the name GitHub Pages expects.
+   - Create `.claude/launch.json` **inside `compliance-climb-deploy` itself** (the preview tool
+     resolves relative to wherever Bash's cwd happens to be, which has consistently been this
+     folder):
      ```json
      {
        "version": "0.0.1",
@@ -58,101 +54,135 @@ it may have moved again.
        }]
      }
      ```
-     (serves the parent folder so both the deploy repo and any sibling test file are reachable)
-   - `preview_start` with that config name, then navigate to
-     `http://localhost:5177/<test-file>.html` (use `force: true` on navigate — plain navigate
-     calls were flaky this session for no clear reason).
-   - Clean up afterward: delete the test file and the `.claude` folder.
+   - `preview_start` with that config name, navigate to `http://localhost:5177/<test-file>.html`
+     (use `force: true` — plain navigate has been flaky).
+   - Clean up the test file and `.claude` folder afterward.
 4. Commit and push:
    ```bash
    git add index.html
    git commit -m "..."
    git push origin main
    ```
-   Git credentials are cached (Windows Credential Manager, `credential.helper=manager`) — no
-   browser auth prompt needed, push just works.
-5. Confirm production actually updated (GitHub Pages takes ~1-2 min to rebuild):
+   Git credentials are cached (Windows Credential Manager) — push just works, no auth prompt.
+5. Confirm production actually updated (GitHub Pages takes ~1-2 min):
    ```bash
-   timeout 90 bash -c 'until curl -s "https://dibyajyotidasgupta.github.io/compliance-and-ladder/?v=$(date +%s)" | grep -q "<some string unique to your change>"; do sleep 5; done; echo FOUND'
+   timeout 90 bash -c 'until curl -s "https://dibyajyotidasgupta.github.io/compliance-and-ladder/?v=$(date +%s)" | grep -q "<unique string from your change>"; do sleep 5; done; echo FOUND'
    ```
+6. **Never push to production without the user explicitly confirming** after a mock/artifact
+   review. No exceptions, this has held all project long — the one time it was overridden was an
+   explicit "You can push this to production" for the vs-competitor mode.
 
-## A real limitation hit repeatedly this session — plan around it
+## A real environment limitation — plan around it
 
-The browser preview tool's **screenshot capture did not work all session** ("Browser pane is not
-displayed, so the page is not compositing frames"). A follow-up isolated test also showed that
-**CSS animations don't progress in `getComputedStyle` reads either** — the tab wasn't actually
-compositing frames at all, not just failing to screenshot. Workaround used throughout: verify
-everything structurally instead —
+The browser preview tool's **screenshot/zoom capture has not worked all project**
+("Browser pane is not displayed, so the page is not compositing frames"). An isolated test also
+showed CSS animations don't progress under `getComputedStyle` polling either — the tab isn't
+compositing frames at all, not just failing to screenshot. **Workaround: verify everything
+structurally instead of visually:**
 - `getBoundingClientRect()` / `getBBox()` for layout and geometry
-- Real DOM presence/absence over real elapsed time (via `performance.now()`) for anything
-  timing-related (toast appear/disappear, animation duration)
+- Real DOM presence/absence over real elapsed time (`performance.now()`) for timing (toasts,
+  animation duration)
 - Console error checks
-- Actual game-state assertions (square number, turn count, etc.) after simulated play
+- Actual game-state assertions (square number, turn count) after simulated/scripted play
 
-This may or may not still be broken in a fresh session — worth testing early (try a screenshot;
-if it fails with that same message, fall back to the structural-verification approach rather
-than repeatedly retrying screenshots).
+Test early in a fresh session whether this is still broken before relying on the workaround.
 
 ## GitHub repo details
 
-- Repo: `https://github.com/DibyajyotiDasgupta/compliance-and-ladder` (public)
-- Owner: DibyajyotiDasgupta
+- Repo: `https://github.com/DibyajyotiDasgupta/compliance-and-ladder` (public, deliberately —
+  theft risk was discussed and accepted; don't change visibility without asking)
 - Branch: `main` (only branch)
 - GitHub Pages: enabled, deploys from `main` / `/ (root)`
-- Local git identity for this repo (set locally, not global):
-  name `Dibyajyoti Dasgupta`, email `dj.deb23@gmail.com`
-- `.gitignore` and `LICENSE` (proprietary/all-rights-reserved, explicitly *not* open source) are
-  already committed — don't remove them.
-- Line-ending warnings ("LF will be replaced by CRLF") on every git command are cosmetic/harmless,
-  not an error.
+- Local git identity (set locally, not global): `Dibyajyoti Dasgupta` / `dj.deb23@gmail.com`
+- `.gitignore` and `LICENSE` (proprietary, all-rights-reserved — NOT open source) already
+  committed, don't remove or relicense.
+- "LF will be replaced by CRLF" warnings on git commands are cosmetic, not errors.
 
-## Current state as of this handover (all pushed, confirmed live)
+## What's actually live right now (vs-competitor mode)
 
-Commit history, newest first:
-1. Anchor toast to the landing square on desktop, remove board captions, enlarge toast
-2. Replace token with a Shih Tzu design
-3. Rename stat labels to Snake bites / Keka rescues
-4. Require exact roll to reach square 100 (overshoot doesn't move the token)
-5. Add turns-taken as a third end-screen metric
-6. Compact mobile control bar; relocate two crowded ladder endpoints
-7. Fix missing viewport meta tag; simplify board captions and pin roll button on mobile
-8. Add creator credit line ("Concept & build by Dibyajyoti Dasgupta")
-9. Add .gitignore and proprietary license notice
-10. Initial commit
+- **Two tokens race simultaneously**: you (dog, Shih Tzu design) vs. a computer competitor (cat).
+  Identical rules for both sides — same snakes/ladders, same win condition.
+- **Board**: 10×10 boustrophedon numbering, illustrated snakes (rotating warm-color palette,
+  faces, tongues) and purple ladders, trophy at square 100. One ladder endpoint was relocated
+  (43→75) earlier to reduce visual crowding.
+- **Win condition**: exact roll required to land on 100 — overshoot doesn't move the token, turn
+  still counts ("So close!" toast). First side to hit exactly 100 wins; shows a win screen for
+  the winner, loss screen for the other side. "Rematch" button resets both.
+- **Six-roll bonus/cancellation rule** (classic Snakes & Ladders rule, confirmed against a rule
+  the user quoted from Google): rolling a 6 grants another roll. Three consecutive 6s cancels all
+  three and sends the token back to wherever it was **before the first of the three sixes**
+  (checkpoint-based, not back to square 1) — shown via an "Oops, three sixes — back to..." toast.
+  For the human player, each bonus roll requires an explicit re-click of the roll button (feels
+  more in-control); for the computer, bonus rolls auto-chain via an internal loop
+  (`runComputerTurn()`). Verified via deterministic `Math.random` overrides (forced values at
+  specific call-count positions) plus a 100k-game Monte Carlo simulation — three-consecutive-sixes
+  shows up in ~13% of full races, confirmed "exceedingly rare" per attempt but not rare
+  per-full-game, matching what the user wanted checked.
+- **Desktop-only spacebar-to-roll**: `keydown` listener on `e.code==='Space'`, gated to
+  `window.innerWidth > 600`, with `preventDefault()`.
+- **Toasts**: actor-named (distinguishes "You" vs "Competitor" events), anchored above the landing
+  square on desktop, fixed bottom-center on mobile.
+- **End screen**: 3 stats — Snake bites, Keka rescues, Turns taken.
+- **Credit line**: "Concept & build by Dibyajyoti Dasgupta" (don't remove).
 
-Notable design decisions baked into the current build:
-- Board: 10×10 boustrophedon numbering, illustrated snakes (rotating warm-color palette, faces,
-  tongues) and purple ladders, trophy icon at square 100.
-- No on-board caption text anymore (removed for clutter) — story text only appears via: (a) hover
-  tooltip (native SVG `<title>`, desktop only, mouse-dependent) and (b) a toast on landing.
-- Toast: bigger than original (1.1rem font, 20px/26px padding), bouncy entrance, ~3.9s hold. On
-  desktop it's anchored to appear right above wherever the token just landed (real math, not
-  fixed position); on mobile it's untouched — fixed bottom-center, smaller.
-- Mobile (≤600px breakpoint): dice + roll button merged into one compact bar pinned to the
-  bottom of the screen; stats grid and "Your turn" label hidden to save space.
-- Win condition: exact roll required to land on 100 (overshoot = no move, turn still counts,
-  "So close!" toast).
-- End screen shows 3 stats: Snake bites, Keka rescues, Turns taken.
+## Open item #1 (active, in-progress): mobile bug — status panel blocks the board
 
-## Open items — not yet decided, mid-conversation when handover was requested
+**The bug (confirmed live via user's phone screenshot):** on mobile, the "You / Competitor"
+status panel completely blocks the board because `.panel-card`'s base
+`display:flex; flex-direction:column;` was never overridden back to a compact row layout for the
+new two-player bar (unlike the old solo game's from-scratch compact mobile rule). **This has NOT
+been fixed in production yet** — only diagnosed and mocked up.
 
-1. **Hero title/tagline copy** — currently "The Compliance Climb" / "Roll the dice. Dodge the
-   chaos of manual payroll compliance. Climb toward square 100 — where every rule is already
-   handled." User asked for better name + copy; I proposed keeping the title (has good
-   alliteration) and swapping the tagline to one that explains the snake/ladder mechanic
-   directly: "Every snake's a compliance slip-up. Every ladder's Keka catching it. Roll and find
-   out which one you hit." **No decision made yet.**
-2. **Anchored-toast sizing feedback** — the desktop anchored toast was sized narrower (480px)
-   than the earlier "bigger" fixed version (560px) since it's now a contextual callout rather
-   than a banner. User was asked to check whether it should be wider on the live artifact — no
-   confirmation received yet.
+**Process so far:** user asked to brainstorm fixes before touching code, then asked for a real
+side-by-side mockup of three options (built as standalone `mobile-fix-options.html`, published as
+the "Mobile Layout Options" artifact above, with an A/B/C switcher bar and a dynamic mode-label
+banner so the active option is unambiguous on a real phone with zero scrolling).
+
+**The three options:**
+- **A — "Normal flow"**: status cards placed above the board as normal block content (not fixed).
+  **Rejected by user** — no reason needed beyond "completely out."
+- **B — "Compact strip"**: status strip joins the die + roll button in the existing fixed bottom
+  bar (row layout). **User likes this**: "minimalistic and pretty clean."
+- **C — "Board overlay"**: small floating badge pills in the board's top corners (`position:
+  absolute` inside `.board-card`). **User likes the concept** — "spells out who's who" — **but is
+  concerned the floating badges obstruct the board's number labels underneath them** (see the
+  phone screenshot the user sent: the "You: 1" and "Competitor: 1" badges visually sit on top of
+  the top-row square numbers 91–100).
+
+**Decision was interrupted mid-discussion** (user was cut off / hit Stop before finishing their
+comparison) — **no final pick has been made.** Next session should either:
+1. Ask the user to just finish picking between B and C (A is confirmed dead), or
+2. If C is still appealing, propose a concrete fix for the overlap first (e.g. shrink the badges
+   further, move them to float just *above* the board's top edge instead of on top of the first
+   row of squares, reduce opacity, or use a smaller pill with just an icon + number rather than
+   full "You: N" text) and show that as a refined C before asking again.
+
+Once a direction is confirmed: implement it in actual production (`index.html`), following the
+standard workflow above (test locally, artifact preview optional, commit, push, confirm live).
+The mobile-fix-options.html mockup file itself is throwaway scratch — don't try to preserve or
+port it wholesale, just carry the CSS approach it proved out into `index.html`.
+
+## Open item #2 (deferred, approved in principle, NOT applied)
+
+- **Rename title**: "The Compliance Climb" → "The Compliance Game". User explicitly said
+  **"do not apply yet"** — needs an explicit go-ahead before editing.
+- **Reduce hero heading/subtext font sizes** — same status, approved in principle, not applied,
+  waiting on explicit go-ahead.
+- Do both together when the user confirms, since they were raised in the same breath.
+
+## Open item #3 (deferred, no scope decided)
+
+**Music** — user referenced https://snake-skip.lovable.app/ as a rough example of the vibe
+wanted, then said **"We'll handle the music later."** No decision on SFX vs. background loop vs.
+both, no asset sourcing discussed yet. Don't start on this unless the user brings it back up.
 
 ## Things NOT to do without checking with the user
 
-- Don't rename/change the repo visibility (public, deliberately — user decided theft risk was
-  overblown, confirmed real intent is "public but not likely to be stumbled on").
-- Don't add an open-source license (MIT etc.) — the LICENSE is deliberately proprietary.
-- Don't touch mobile view without explicit ask — user said "it works in its current state,"
-  multiple times.
-- Don't push to production without the user explicitly confirming after a mock/artifact review —
-  this has been the pattern every single time all session, no exceptions.
+- Don't change repo visibility (stays public, deliberately).
+- Don't add an open-source license — LICENSE is deliberately proprietary.
+- Don't push to production without explicit confirmation after a mock/artifact review — no
+  exceptions found all project except the one explicit "push this to production" for the
+  vs-competitor mode.
+- Don't apply the title/font-size change (open item #2) without an explicit go-ahead, even though
+  it was "approved in principle."
+- Don't start on music (open item #3) unprompted.
