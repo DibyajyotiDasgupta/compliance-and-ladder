@@ -190,9 +190,13 @@
   @media (prefers-reduced-motion: reduce){
     #token, #token.sliding{ transition: none; }
   }
-  .token-body{ fill: var(--accent); stroke: var(--surface); stroke-width: 2.5; }
-  .token-face{ fill: var(--surface); }
-  .token-handle{ stroke: var(--ink); stroke-width: 2; fill:none; stroke-linecap: round; }
+  .dog-ear{ fill: var(--accent-strong); }
+  .dog-head{ fill: var(--accent); stroke: var(--surface); stroke-width: 2.5; }
+  .dog-topknot{ fill: var(--accent-strong); }
+  .dog-muzzle{ fill: var(--surface); }
+  .dog-nose{ fill: var(--ink); }
+  .dog-eye{ fill: var(--ink); }
+  .dog-eye-shine{ fill: var(--surface); }
 
   /* ---- Side panel ---- */
   .panel{
@@ -497,12 +501,16 @@
           <g id="numbers"></g>
           <g id="trophy"></g>
           <g id="token">
-            <path class="token-handle" d="M -6 -17 Q 0 -23 6 -17"></path>
-            <circle class="token-body" r="13"></circle>
-            <rect x="-8" y="1" width="16" height="2.4" fill="var(--surface)" opacity="0.55"></rect>
-            <circle class="token-face" cx="-4.5" cy="-2" r="1.8"></circle>
-            <circle class="token-face" cx="4.5" cy="-2" r="1.8"></circle>
-            <path class="token-handle" d="M -4.5 3.5 Q 0 6.5 4.5 3.5" stroke="var(--surface)"></path>
+            <path class="dog-ear" d="M -10 -6 C -19 -3 -20 9 -12 14 C -8 16.5 -5.5 11 -6.5 5 C -7.5 -1 -9 -5 -10 -6 Z"></path>
+            <path class="dog-ear" d="M 10 -6 C 19 -3 20 9 12 14 C 8 16.5 5.5 11 6.5 5 C 7.5 -1 9 -5 10 -6 Z"></path>
+            <ellipse class="dog-topknot" cx="0" cy="-15" rx="4.2" ry="5.5" transform="rotate(-6 0 -15)"></ellipse>
+            <circle class="dog-head" r="13"></circle>
+            <circle class="dog-eye" cx="-4.6" cy="-1.5" r="2.2"></circle>
+            <circle class="dog-eye" cx="4.6" cy="-1.5" r="2.2"></circle>
+            <circle class="dog-eye-shine" cx="-5.3" cy="-2.2" r="0.6"></circle>
+            <circle class="dog-eye-shine" cx="3.9" cy="-2.2" r="0.6"></circle>
+            <ellipse class="dog-muzzle" cx="0" cy="6" rx="6.2" ry="4.6"></ellipse>
+            <ellipse class="dog-nose" cx="0" cy="4.3" rx="1.7" ry="1.2"></ellipse>
           </g>
         </svg>
       </div>
