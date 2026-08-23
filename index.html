@@ -1,4 +1,4 @@
-<title>The Compliance Climb</title>
+<title>The Compliance Game</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -82,45 +82,23 @@
     padding: 28px 24px 64px;
   }
 
-  /* ---- Top bar ---- */
-  .topbar{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding-bottom: 22px;
-  }
-  .wordmark{
-    font-family:'Manrope', sans-serif;
-    font-weight:800;
-    font-size: 1.35rem;
-    color: var(--accent-strong);
-    letter-spacing: -0.02em;
-  }
-  .eyebrow{
-    font-size: 0.75rem;
-    font-weight:700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--ink-soft);
-  }
-
   .hero{
-    padding: 6px 0 30px;
+    padding: 6px 0 24px;
     max-width: 640px;
   }
   .hero h1{
     font-family:'Fraunces', Georgia, serif;
     font-optical-sizing: auto;
     font-weight: 600;
-    font-size: clamp(2rem, 4vw, 2.85rem);
-    line-height: 1.05;
-    margin: 0 0 10px;
+    font-size: clamp(1.3rem, 2.4vw, 1.7rem);
+    line-height: 1.15;
+    margin: 0 0 6px;
     text-wrap: balance;
   }
   .hero p{
     margin:0;
     color: var(--ink-soft);
-    font-size: 1.05rem;
+    font-size: 0.82rem;
     line-height:1.5;
     text-wrap: balance;
   }
@@ -205,6 +183,27 @@
   .cat-pupil{ fill: var(--ink); }
   .cat-nose{ fill: var(--cat-nose); }
   .cat-whisker, .cat-mouth{ stroke: var(--ink); stroke-width: 1; fill:none; stroke-linecap:round; opacity:0.6; }
+
+  /* ---- Board badges (mobile-only status readout, see mobile block) ---- */
+  .board-badges{ display:none; }
+  .board-badge{
+    display:flex; align-items:center; gap: 6px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 999px;
+    padding: 5px 10px 5px 8px;
+    box-shadow: var(--shadow);
+    font-size: 0.72rem;
+    font-weight: 800;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+  .board-badge .dot{ width: 8px; height: 8px; border-radius: 50%; flex-shrink:0; }
+  .board-badge.you{ color: var(--you); }
+  .board-badge.you .dot{ background: var(--you); }
+  .board-badge.cpu{ color: var(--cpu); }
+  .board-badge.cpu .dot{ background: var(--cpu); }
+  .board-badge .sq{ color: var(--ink); font-weight: 700; }
+  .board-badge.active{ border-color: currentColor; box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 25%, transparent); }
 
   /* ---- Side panel ---- */
   .panel{ display:flex; flex-direction: column; gap: 16px; }
@@ -431,7 +430,13 @@
 
   /* ---- Mobile ---- */
   @media (max-width: 600px){
-    .app{ padding-bottom: 108px; }
+    .app{ padding: 16px 16px 108px; }
+    .hero{ padding: 0 0 14px; }
+    .hero h1{ font-size: 1.2rem; margin: 0 0 4px; }
+    .hero p{ font-size: 0.76rem; }
+    .layout{ gap: 14px; }
+    .board-legend{ display:none; }
+    .page-credit{ display:none; }
     .end-card h2{ font-size: 1.5rem; }
 
     .panel-card{
@@ -439,30 +444,48 @@
       left: 16px; right: 16px; bottom: 16px;
       z-index: 30;
       box-shadow: 0 10px 24px -8px rgba(27,19,48,0.45);
+      display: grid;
+      grid-template-columns: auto 1fr;
+      grid-template-areas: "restart restart" "die roll";
+      align-items: center;
+      gap: 10px;
     }
-    .player-row{ padding: 8px 10px; }
+    .player-row{ display:none; }
     .last-move{ display:none; }
-    .dice-row{ padding: 0; }
+    .dice-row{ grid-area: die; padding: 0; justify-content: flex-start; }
     .die{ width: 40px; height: 40px; padding: 5px; }
     .pip{ width: 6px; height: 6px; }
+    .roll-btn{ grid-area: roll; }
+    .restart-btn{ grid-area: restart; }
     .rules-note{ display:none; }
     #toast-host{ bottom: 92px; }
+
+    /* Status moves onto the board itself so the fixed bottom bar stays compact
+       and never covers the grid (previously the full player-row cards sat in
+       the fixed bar and blocked most of the board). */
+    .board-card{ padding-top: 52px; }
+    .board-badges{
+      display:flex;
+      position: absolute;
+      top: 14px; left: 18px; right: 18px;
+      justify-content: space-between;
+      z-index: 5;
+    }
   }
 </style>
 
 <div class="app">
-  <div class="topbar">
-    <div class="wordmark">keka</div>
-    <div class="eyebrow">Compliance, gamified</div>
-  </div>
-
   <div class="hero">
-    <h1>The Compliance Climb</h1>
+    <h1>The Compliance Game</h1>
     <p>Roll the dice. Dodge the chaos of manual payroll compliance. Race the competitor to square 100.</p>
   </div>
 
   <div class="layout">
     <div class="board-card">
+      <div class="board-badges">
+        <div class="board-badge you active" id="badgeYou"><span class="dot"></span>You: <span class="sq" id="badgeSquareYou">1</span></div>
+        <div class="board-badge cpu" id="badgeCpu"><span class="dot"></span>Competitor: <span class="sq" id="badgeSquareCpu">1</span></div>
+      </div>
       <div class="board-wrap">
         <svg id="board" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg">
           <g id="cells"></g>
@@ -823,6 +846,8 @@
       square: 1, snakes: 0, ladders: 0, turns: 0,
       squareEl: document.getElementById('statSquare'),
       rowEl: document.getElementById('rowYou'),
+      badgeEl: document.getElementById('badgeYou'),
+      badgeSquareEl: document.getElementById('badgeSquareYou'),
       toastAccent: null // uses per-event accent
     },
     computer: {
@@ -830,6 +855,8 @@
       square: 1, snakes: 0, ladders: 0, turns: 0,
       squareEl: document.getElementById('cpuSquare'),
       rowEl: document.getElementById('rowCpu'),
+      badgeEl: document.getElementById('badgeCpu'),
+      badgeSquareEl: document.getElementById('badgeSquareCpu'),
       toastAccent: null
     }
   };
@@ -841,9 +868,14 @@
   function setActive(sideKey){
     SIDES.player.rowEl.classList.toggle('active', sideKey === 'player');
     SIDES.computer.rowEl.classList.toggle('active', sideKey === 'computer');
+    SIDES.player.badgeEl.classList.toggle('active', sideKey === 'player');
+    SIDES.computer.badgeEl.classList.toggle('active', sideKey === 'computer');
   }
 
-  function updateSquareDisplay(side){ side.squareEl.textContent = side.square; }
+  function updateSquareDisplay(side){
+    side.squareEl.textContent = side.square;
+    side.badgeSquareEl.textContent = side.square;
+  }
 
   function delay(ms){ return new Promise(function(res){ setTimeout(res, ms); }); }
 
