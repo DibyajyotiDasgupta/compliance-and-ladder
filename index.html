@@ -180,9 +180,6 @@
   .trophy-part{ fill: #F0A93B; }
   .trophy-outline{ stroke: #C97F1D; stroke-width: 1.4; fill:none; stroke-linecap:round; stroke-linejoin:round; }
 
-  .tag-pill{ fill: var(--surface); stroke-width: 1.2; }
-  .tag-text{ font-family:'Manrope', sans-serif; font-size: 7.5px; font-weight: 800; }
-
   #token{
     transition: transform 0.16s ease;
   }
@@ -349,22 +346,26 @@
     gap: 8px;
     align-items:center;
     pointer-events:none;
-    width: min(92vw, 460px);
+    width: min(94vw, 560px);
   }
   .toast{
     background: var(--surface);
     border: 1px solid var(--border);
-    border-left: 4px solid var(--toast-accent, var(--accent));
-    border-radius: 12px;
-    padding: 12px 16px;
+    border-left: 5px solid var(--toast-accent, var(--accent));
+    border-radius: 14px;
+    padding: 20px 26px;
     box-shadow: var(--shadow);
-    font-size: 0.88rem;
-    line-height: 1.35;
-    animation: toastIn 0.22s ease, toastOut 0.3s ease 2.3s forwards;
+    font-size: 1.1rem;
+    line-height: 1.4;
+    animation: toastIn 0.42s cubic-bezier(.34,1.56,.64,1), toastOut 0.3s ease 3.6s forwards;
     max-width: 100%;
   }
-  .toast b{ display:block; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 3px; color: var(--toast-accent, var(--accent)); }
-  @keyframes toastIn{ from{ opacity:0; transform: translateY(8px);} to{ opacity:1; transform: translateY(0);} }
+  .toast b{ display:block; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 5px; color: var(--toast-accent, var(--accent)); }
+  @keyframes toastIn{
+    0%{ opacity:0; transform: translateY(8px) scale(0.85); }
+    60%{ opacity:1; transform: translateY(0) scale(1.04); }
+    100%{ opacity:1; transform: translateY(0) scale(1); }
+  }
   @keyframes toastOut{ from{ opacity:1;} to{ opacity:0; transform: translateY(-6px);} }
 
   /* ---- End overlay ---- */
@@ -444,10 +445,8 @@
   }
   .again-btn:hover{ background: var(--surface-alt); }
 
-  /* ---- Mobile: simplify board captions, compact fixed control bar ---- */
+  /* ---- Mobile: compact fixed control bar ---- */
   @media (max-width: 600px){
-    .tag-pill, .tag-text{ display:none; }
-
     .app{ padding-bottom: 92px; }
 
     .panel-card{
@@ -656,25 +655,6 @@
   }
   function lerp(p1, p2, t){ return {x: p1.x + (p2.x-p1.x)*t, y: p1.y + (p2.y-p1.y)*t}; }
 
-  function pillWidth(text){ return Math.max(34, text.length * 3.6 + 10); }
-  function safeOffset(anchor, dirX, dirY, dist, halfW){
-    var px = anchor.x + dirX*dist, py = anchor.y + dirY*dist;
-    if (px - halfW < 8 || px + halfW > 592 || py < 14 || py > 586){
-      px = anchor.x - dirX*dist; py = anchor.y - dirY*dist;
-    }
-    px = Math.max(halfW + 6, Math.min(600 - halfW - 6, px));
-    py = Math.max(12, Math.min(588, py));
-    return {x:px, y:py};
-  }
-  function drawTag(parent, text, anchor, dirX, dirY, dist, colorForText){
-    var w = pillWidth(text);
-    var pos = safeOffset(anchor, dirX, dirY, dist, w/2);
-    parent.appendChild(el('rect', {class:'tag-pill', x:pos.x-w/2, y:pos.y-6, width:w, height:12, rx:6, stroke:colorForText}));
-    var t = el('text', {class:'tag-text', x:pos.x, y:pos.y+2.6, 'text-anchor':'middle', fill:colorForText});
-    t.textContent = text;
-    parent.appendChild(t);
-  }
-
   LADDERS.forEach(function(l){
     var p1 = squareToCoord(l.from), p2 = squareToCoord(l.to);
     var dx = p2.x-p1.x, dy = p2.y-p1.y;
@@ -698,7 +678,6 @@
     // checkmark badge at top (p2)
     g.appendChild(el('circle', {class:'ladder-badge-bg', cx:p2.x, cy:p2.y, r:11}));
     g.appendChild(el('path', {class:'ladder-badge-check', d:'M '+(p2.x-4.5)+' '+p2.y+' L '+(p2.x-1)+' '+(p2.y+3.5)+' L '+(p2.x+5)+' '+(p2.y-4)}));
-    drawTag(g, l.short, p2, n.x, n.y, 20, 'var(--accent-strong)');
     laddersG.appendChild(g);
   });
 
@@ -776,8 +755,6 @@
       'M '+tongueTip.x+' '+tongueTip.y+' L '+fork1.x+' '+fork1.y+' '+
       'M '+tongueTip.x+' '+tongueTip.y+' L '+fork2.x+' '+fork2.y}));
 
-    drawTag(g, s.short, p1, n.x, n.y, 16, color);
-
     snakesG.appendChild(g);
   });
 
@@ -816,7 +793,41 @@
 
   // --- toast ---
   var toastHost = document.getElementById('toast-host');
-  function showToast(kicker, text, accentVar){
+  function positionToastNearSquare(square){
+    var svg = document.getElementById('board');
+    var rect = svg.getBoundingClientRect();
+    var scale = rect.width / 600;
+    var p = squareToCoord(square);
+    var px = rect.left + p.x * scale;
+    var py = rect.top + p.y * scale;
+
+    var hostWidth = Math.min(window.innerWidth * 0.6, 480);
+    var halfW = hostWidth / 2;
+    var left = Math.max(halfW + 16, Math.min(window.innerWidth - halfW - 16, px));
+
+    toastHost.style.width = hostWidth + 'px';
+    toastHost.style.left = left + 'px';
+    toastHost.style.transform = 'translateX(-50%)';
+
+    var placeAbove = py > 170;
+    if (placeAbove){
+      toastHost.style.top = 'auto';
+      toastHost.style.bottom = (window.innerHeight - py + 18) + 'px';
+    } else {
+      toastHost.style.bottom = 'auto';
+      toastHost.style.top = (py + 18) + 'px';
+    }
+  }
+
+  function resetToastPosition(){
+    toastHost.style.width = '';
+    toastHost.style.left = '';
+    toastHost.style.top = '';
+    toastHost.style.bottom = '';
+    toastHost.style.transform = '';
+  }
+
+  function showToast(kicker, text, accentVar, anchorSquare){
     var t = document.createElement('div');
     t.className = 'toast';
     t.style.setProperty('--toast-accent', accentVar);
@@ -826,8 +837,15 @@
     var span = document.createElement('span');
     span.textContent = text;
     t.appendChild(span);
+
+    if (anchorSquare && window.innerWidth > 600){
+      positionToastNearSquare(anchorSquare);
+    } else {
+      resetToastPosition();
+    }
+
     toastHost.appendChild(t);
-    setTimeout(function(){ t.remove(); }, 2650);
+    setTimeout(function(){ t.remove(); }, 3900);
   }
 
   // --- state ---
@@ -902,7 +920,7 @@
       await slideTo(s.to, 'snake');
       state.snakes++;
       updateStats();
-      showToast('Compliance mishap', s.text, 'var(--danger)');
+      showToast('Compliance mishap', s.text, 'var(--danger)', s.to);
       await delay(500);
     } else if (ladderMap[state.square]){
       var l = ladderMap[state.square];
@@ -910,7 +928,7 @@
       await slideTo(l.to, 'ladder');
       state.ladders++;
       updateStats();
-      showToast('Keka handles it', l.text, 'var(--accent)');
+      showToast('Keka handles it', l.text, 'var(--accent)', l.to);
       await delay(500);
     }
 
